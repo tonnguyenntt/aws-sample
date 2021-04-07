@@ -1,0 +1,6 @@
+---
+- hosts: aws_public_instance
+  remote_user: root
+  roles:
+    - mysql_install
+    - nginx_install

@@ -1,0 +1,67 @@
+---
+# Ensure mysql service is started
+- name: Secure mysql installation - Ensure mysql service is started
+  service:
+    name: "{{ mysql_service }}"
+    state: started
+
+# Remove anonymous users
+- name: Secure mysql installation - Remove anonymous users
+  mysql_user:
+    login_user: "{{ dba }}"
+    login_password: "{{ dba_pass }}"
+    user: ""
+    host_all: yes
+    state: absent
+  no_log: true
+
+
+# Disallow root login remotely
+- name: Secure mysql installation - Disallow root login remotely
+  mysql_user:
+    login_user: "{{ dba }}"
+    login_password: "{{ dba_pass }}"
+    user: root
+    host: "{{ ansible_fqdn | lower }}"
+    state: absent
+
+
+# Remove test database and access to it
+- name: Secure mysql installation - Remove test database
+  mysql_db:
+    login_user: "{{ dba }}"
+    login_password: "{{ dba_pass }}"
+    db: test
+    state: absent
+
+- name: Secure mysql installation - Remove access to test database
+  shell: >
+    mysql -u {{ dba }} -p{{ dba_pass }} -NBe
+    'DELETE FROM mysql.db
+    WHERE Db="test" OR Db="test\\_%";
+    FLUSH PRIVILEGES;'
+  changed_when: false
+  no_log: true
+
+
+# Disable mysql password policy when env is NOT prod
+- name: Secure mysql installation - Disable mysql password policy non-prod env.
+  mysql_variables:
+    login_user: "{{ dba }}"
+    login_password: "{{ dba_pass }}"
+    variable: "{{ item.key }}"
+    value: "{{ item.value }}"
+  with_dict:
+    - validate_password_policy: LOW
+    - validate_password_length: 4
+  when: env != 'prod'
+  changed_when: false
+  failed_when: false
+
+
+# Execute mysql_upgrade command if this is an upgrade
+- name: Secure mysql installation - Execute mysql_upgrade command if this is an upgrade
+  shell: mysql_upgrade -u {{ dba }} -p{{ dba_pass }} --force
+  when: upgrade_mysql|bool
+  changed_when: false
+  no_log: true

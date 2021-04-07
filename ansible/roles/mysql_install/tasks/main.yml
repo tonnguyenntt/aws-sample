@@ -1,0 +1,51 @@
+---
+# tasks file for mysql_install
+# Install python and python*-PyMySQL
+- import_tasks: install_pymysql.yml
+  tags:
+    - always
+
+# Check and remove existing mysql if any
+- import_tasks: check_existing_mysql.yml
+  when: check_existing|bool
+  tags:
+    - check_existing
+
+- import_tasks: remove_existing_mysql.yml
+  when: remove_existing|bool
+  tags:
+    - remove_existing
+
+# Install mysql
+- import_tasks: install_mysql.yml
+  tags:
+    - install_mysql
+
+- import_tasks: post_install_mysql.yml
+  tags:
+    - install_mysql
+
+# Check mysql root access
+- import_tasks: check_mysql_root.yml
+  when: check_mysql_root|bool
+  tags:
+    - check_mysql_root
+
+# Reset mysql root access
+- import_tasks: reset_mysql_root.yml
+  when: reset_mysql_root|bool
+  tags:
+    - reset_mysql_root
+
+# Secure mysql installation
+- import_tasks: secure_mysql_installation.yml
+  tags:
+    - secure_mysql
+
+# Create app db and user
+- import_tasks: create_db_and_user.yml
+  when: >
+    app_db_name is defined
+    and app_db_users is defined
+  tags:
+    - create_db

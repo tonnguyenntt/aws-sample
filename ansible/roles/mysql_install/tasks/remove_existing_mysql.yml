@@ -1,0 +1,6 @@
+---
+# Remove existing mysql|mariadb packages
+- name: Remove existing mysql|mariadb packages
+  yum:
+    name: "{{ mysql_removal_list }}"
+    state: absent

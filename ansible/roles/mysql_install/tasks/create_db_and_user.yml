@@ -1,0 +1,26 @@
+---
+# Create app db
+- name: Create app db
+  mysql_db:
+    login_user: "{{ dba }}"
+    login_password: "{{ dba_pass }}"
+    db: "{{ item }}"
+    collation: utf8_bin
+    encoding: utf8
+    state: present
+  with_items:
+    - "{{ app_db_name }}"
+
+# Create app db user and grant privileges
+- name: Create app db user and grant privileges
+  mysql_user:
+    login_user: "{{ dba }}"
+    login_password: "{{ dba_pass }}"
+    user: "{{ item.name }}"
+    password: "{{ item.password }}"
+    update_password: always
+    priv: "{{ item.priv }}"
+    host: "{{ item.host }}"
+    state: present
+  with_items: "{{ app_db_users }}"
+  no_log: true

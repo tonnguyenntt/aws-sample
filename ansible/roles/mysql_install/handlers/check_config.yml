@@ -1,0 +1,21 @@
+---
+# Check mysql config for error
+- name: Check mysql config for error
+  shell: "mysqld --verbose --help"
+  register: mysql_config_status
+  changed_when: >
+    (mysql_config_status.stderr != "")
+    or ('[ERROR]' in mysql_config_status.stdout)
+  failed_when: false
+  no_log: true
+
+
+- name: Abort due to mysql config error
+  fail:
+    msg: |
+      MySQL server cannot start due to config error.
+      #######################################
+      {{ mysql_config_status.stderr }}
+      #######################################
+      Please double-check your config file
+  when: mysql_config_status is changed

@@ -1,0 +1,29 @@
+- name: Check mysql root access - Ensure mysql service is started
+  service:
+    name: "{{ mysql_service }}"
+    state: started
+
+
+- name: Check mysql root access - Get mysql info with given password
+  mysql_info:
+    login_user: "{{ dba }}"
+    login_password: "{{ dba_pass }}"
+    filter:
+    - databases
+    - version
+  register: mysql_info
+  changed_when: mysql_info.databases is not defined
+  failed_when: false
+
+
+- name: Check mysql root access - If mysql root is NOT accessible -> Abort!
+  fail:
+    msg: |
+      Check & result:
+          #######################################
+          @{{ ansible_hostname }}~> mysql -u {{ dba }} -p<dba_pass> -e 'SHOW DATABASES;'
+          {{ mysql_info.msg }}
+          #######################################
+      Given password for {{ dba }} does NOT work ~> Abort!!!
+      In order to reset mysql root, please rerun with option --extra-vars "check_mysql_root=false reset_mysql_root=true"
+  when: mysql_info is changed

@@ -1,0 +1,76 @@
+---
+# Check if mysql is installed already
+- name: Check existing mysqld
+  shell: >
+    PATH=$PATH:{{ path_env }} mysqld --version
+  register: existing_mysql
+  changed_when: false
+  failed_when: false
+
+
+# If mysql is not installed yet
+- name: Set fact if mysql is NOT installed
+  set_fact:
+    check_mysql_root: false
+    reset_mysql_root: true
+  when: existing_mysql.stderr != ''
+
+
+# If mysql is existing already
+- name: Further steps if mysql is installed already
+  block:
+  ### block start ###
+  - name: Set fact if mysql is existing
+    set_fact:
+      existing_mysql_version: "{{ existing_mysql.stdout | regex_search('(\\d+(\\.\\d+)+)') }}"
+
+  - name: Compare version - if existing < expected -> Upgrade!
+    set_fact:
+      remove_existing: true
+      upgrade_mysql: true
+    when: existing_mysql_version is version(mysql_version, '<')
+
+  - name: Compare version - if existing = expected -> Warning but Continue!
+    block:
+    ### block start ###
+    - name: Compare version - if existing = expected -> Warning!
+      debug:
+        msg: |
+          Check & result:
+              #######################################
+              @{{ ansible_hostname }}~> mysqld --version
+              {{ existing_mysql.stdout }}
+              {{ existing_mysql.stderr }}
+              #######################################
+          Existing mysql version ({{ existing_mysql_version }}) = expected version ({{ mysql_version }})
+          This playbook will continue.
+          However, you can always force a reinstallation by rerunning with option --extra-vars "check_existing=false remove_existing=true"
+
+    - name: Compare version - if existing = expected -> Continue!
+      set_fact:
+        remove_existing: false
+        upgrade_mysql: false
+    ### block end ###
+    when: existing_mysql_version is version(mysql_version, '=')
+
+  - name: Compare version - if existing > expected -> Warning and Abort!
+    block:
+    ### block start ###
+    - name: Compare version - if existing > expected -> Warning!
+      debug:
+        msg: |
+          Check & result:
+              #######################################
+              @{{ ansible_hostname }}~> mysqld --version
+              {{ existing_mysql.stdout }}
+              {{ existing_mysql.stderr }}
+              #######################################
+          Existing mysql version ({{ existing_mysql_version }}) > expected version ({{ mysql_version }}) ~> Abort!!!
+          In order to force downgrading or reinstallation, please rerun with option --extra-vars "check_existing=false remove_existing=true"
+
+    - name: Compare version - if existing > expected -> Abort!
+      meta: end_host
+    ### block end ###
+    when: existing_mysql_version is version(mysql_version, '>')
+  ### block end ###
+  when: existing_mysql.stderr == ''

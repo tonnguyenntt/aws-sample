@@ -1,0 +1,37 @@
+# Execute mysqld --initialize if mysql data dir is empty
+- name: Post installation - Execute mysqld --initialize if mysql data dir is empty
+  shell: "mysqld --initialize-insecure --user={{ mysql_user }}"
+  args:
+    creates: "{{ mysql_data_dir }}/mysql"
+  notify:
+    - "Restart mysql service"
+
+
+# Set ownership on mysql data dir and mysql log dir
+- name: Post installation - Set ownership on mysql data dir and mysql log dir
+  file:
+    dest: "{{ item }}"
+    owner: "{{ mysql_user }}"
+    group: "{{ mysql_user }}"
+    state: directory
+    recurse: yes
+  with_items:
+    -  "{{ mysql_data_dir }}"
+    -  "{{ mysql_log_dir }}"
+  notify:
+    - "Restart mysql service"
+
+
+  # Copy mysql config from template to target
+- name: Post installation - Copy mysql config from template to target
+  template:
+    src: "{{ mysql_config_file }}"
+    dest: "{{ mysql_config }}"
+    owner: root
+    group: root
+    mode: 0644
+    force: yes
+    backup: yes
+  notify:
+    - "Check mysql config"
+    - "Restart mysql service"

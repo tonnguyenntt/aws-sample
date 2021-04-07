@@ -1,0 +1,8 @@
+[aws_public_instance]
+your_instance.aws_region.compute.amazonaws.com
+
+[nginx_server:children]
+aws_public_instance
+
+[mysql_server:children]
+aws_public_instance

@@ -1,0 +1,10 @@
+---
+# handlers file for mysql_install
+# Check mysql config
+- name: Check mysql config
+  include_tasks: handlers/check_config.yml
+
+
+# Restart mysql service
+- name: Restart mysql service
+  include_tasks: handlers/restart_mysql.yml

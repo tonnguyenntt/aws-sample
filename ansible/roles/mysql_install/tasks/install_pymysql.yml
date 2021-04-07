@@ -1,0 +1,7 @@
+# Install PyMySQL package for ansible mysql modules
+- name: Install PyMySQL
+  yum:
+    name: "python2-PyMySQL"
+    state: present
+    enablerepo: ultra-centos-7.x-epel
+

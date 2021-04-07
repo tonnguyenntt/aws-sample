@@ -1,0 +1,7 @@
+---
+# Restart mysql service
+- name: Restart mysql
+  service:
+    name: "{{ mysql_service }}"
+    state: restarted
+    enabled: yes

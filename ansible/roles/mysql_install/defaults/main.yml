@@ -1,0 +1,39 @@
+---
+# defaults file for mysql_install
+
+path_env: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/libexec"
+
+check_existing: true
+
+remove_existing: false
+
+upgrade_mysql: false
+
+check_mysql_root: true
+
+reset_mysql_root: false
+
+mysql_removal_list:
+  - mariadb-libs*
+  - mariadb-*
+  - MySQL-*
+  - mysql-community-*
+  - mysql*-community-release-*
+
+mysql_yum_release_package: "mysql57-community-release-el7"
+
+mysql_yum_release_source: "https://repo.mysql.com/{{ mysql_yum_release_package }}.rpm"
+
+mysql_yum_repo: "mysql57-community"
+
+mysql_server_package: "mysql-community-server"
+
+mysql_service: "mysqld"
+
+mysql_config: "/etc/my.cnf"
+
+mysql_user: "mysql"
+
+mysql_data_dir: "/var/lib/mysql"
+
+mysql_log_dir: "/var/log/mysql"

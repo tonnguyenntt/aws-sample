@@ -1,0 +1,16 @@
+---
+# Install yum release package from http://repo.mysql.com
+- name: Install mysql57-community-release from http://repo.mysql.com
+  yum:
+    name: "{{ mysql_yum_release_source }}"
+    state: present
+
+
+# Install mysql server package from repo.mysql.com repo
+- name: Install mysql server package from repo.mysql.com repo
+  yum:
+    name: "{{ mysql_server_package }}-{{ mysql_version }}"
+    enablerepo: "{{ mysql_yum_repo }}"
+    state: present
+  notify:
+    - "Restart mysql service"

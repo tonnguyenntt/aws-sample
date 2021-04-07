@@ -1,0 +1,32 @@
+# Reset mysql root access
+- name: Reset mysql root access - Activate insecure mysql environment variables
+  shell: systemctl set-environment MYSQLD_OPTS="--skip-grant-tables --skip-networking"
+  register: set_insecure_env_status
+
+- name: Reset mysql root access - Start mysql with insecure environment variables
+  service:
+    name: "{{ mysql_service }}"
+    state: restarted
+  register: mysql_service_insecure_status
+  when: set_insecure_env_status.stderr == ""
+
+- name: Reset mysql root access - Update root password within mysql insecure mode
+  shell: >
+    mysql -u root -NBe
+    'UPDATE mysql.user
+    SET authentication_string=PASSWORD("{{ dba_pass }}"), plugin="mysql_native_password", password_expired="N"
+    WHERE User="{{ dba }}";
+    FLUSH PRIVILEGES;'
+  when: mysql_service_insecure_status.state == "started"
+  no_log: true
+
+- name: Reset mysql root access - Deactivate insecure mysql environment variables
+  shell: systemctl unset-environment MYSQLD_OPTS
+  register: unset_insecure_env_status
+
+- name: Reset mysql root access - Restart mysql without insecure environment variables
+  service:
+    name: "{{ mysql_service }}"
+    state: restarted
+  register: mysql_service_secure_status
+  when: unset_insecure_env_status.stderr == ""

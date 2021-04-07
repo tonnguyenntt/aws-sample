@@ -1,0 +1,66 @@
+###
+### client section - used for "mysql", "mysqladmin" clients
+[client]
+port                            = 3306
+socket                          = /var/lib/mysql/mysql.sock
+
+
+###
+### mysqld section - used by MySQL server
+[mysqld]
+user                            = mysql
+port                            = 3306
+socket                          = /var/lib/mysql/mysql.sock
+datadir                         = /var/lib/mysql/
+
+### General server options:
+character-set-server            = utf8
+collation-server                = utf8_bin
+default-storage-engine          = INNODB
+skip-external-locking
+max_allowed_packet              = 256M
+max_connections                 = 200
+explicit_defaults_for_timestamp = 1
+show_compatibility_56           = ON
+
+### Buffer and cache options:
+query_cache_type                = 0
+query_cache_size                = 0
+
+### InnoDB specific options:
+innodb_buffer_pool_size         = 8G
+innodb_log_file_size            = 2G
+innodb_log_buffer_size          = 8M
+innodb_flush_log_at_trx_commit  = 0
+innodb_flush_method             = O_DIRECT
+innodb_default_row_format       = DYNAMIC
+
+### Binary logging options:
+expire_logs_days                = 3
+max_binlog_size                 = 50M
+log-bin                         = mysql-bin
+binlog_format                   = ROW
+server-id                       = 222
+
+### Server logging options:
+log_output                      = FILE
+general-log                     = 0
+log-error                       = {{ mysql_log_dir }}/mysqld.err
+log-error-verbosity             = 2
+slow_query_log_file             = {{ mysql_log_dir }}/slow-query.log
+slow_query_log                  = 1
+long_query_time                 = 2
+
+
+###
+### Other sections
+[mysqldump]
+quick
+max_allowed_packet              = 256M
+single-transaction              = true
+
+[mysql]
+no-auto-rehash
+
+[mysqlhotcopy]
+interactive-timeout
