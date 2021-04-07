@@ -49,3 +49,8 @@ Ansible (2nd task)
 ----------------
 
 Once the public instance is ready thanks to Terraform, Nginx and MySQL could simply be installed with the ansible playbook which calls two ansible roles named *mysql_install* and *nginx_install*
+
+References
+----------------
+
+- Terraform with AWS - <https://nickcharlton.net/posts/terraform-aws-vpc.html>
