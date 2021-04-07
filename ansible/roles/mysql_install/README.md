@@ -39,13 +39,14 @@ Example Playbook
 mysql_version: "5.7.28"
 mysql_config_file: "my.cnf_5.7.j2"
 
-dba: root
+dba: "root"
 dba_pass: <encrypted>
 
- app_db_users:
-  - name: "app_db"
+app_db_name: "app_db"
+app_db_users:
+  - name: "app"
     password: <encrypted>
-    priv: "app_db.*:ALL"
+    priv: "{{ app_db_name }}.*:ALL"
     host: "%"
 ```
 
